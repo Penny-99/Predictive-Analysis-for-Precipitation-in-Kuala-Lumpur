@@ -1,0 +1,528 @@
+---
+title: "Rainfall"
+author: "CHEN XIN WEI 17202767"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+## Get data
+
+```{r setup, include=FALSE}
+getwd()
+Rainfall <- read.csv("Rainfall.csv")
+```
+
+## Data Exploration
+
+```{r}
+names(Rainfall)
+class(Rainfall)
+str(Rainfall)
+dim(Rainfall)
+summary(Rainfall)
+head(Rainfall)
+tail(Rainfall)
+```
+
+**First Variable Drop**
+
+```{r}
+Rainfall <- subset(Rainfall, select = -c(name,datetime,precipprob,preciptype,snow,snowdepth,sunrise,sunset,conditions,stations))
+str(Rainfall)
+```
+
+**Transform categorical variable**
+
+```{r}
+Rainfall$description<-as.factor(Rainfall$description)
+Rainfall$icon<-as.factor(Rainfall$icon)
+Rainfall$uvindex<-as.factor(Rainfall$uvindex)
+```
+
+**Checking relationship between cat var with dependent var**
+
+```{r}
+corr<-aov(precip ~ description * uvindex * icon, data=Rainfall)
+summary(corr)
+```
+
+**correlation matric**
+
+```{r}
+Rainfall_sub <- subset(Rainfall, select = -c(description,icon,uvindex))
+library(corrplot)
+cr_Rainfall <- cor(Rainfall_sub)
+cr_Rainfall
+corrplot(cr_Rainfall,method="color")
+```
+
+## Second Variable Drop
+
+```{r}
+Rainfall <- subset(Rainfall, select = -c(windgust, windspeed, winddir, sealevelpressure, moonphase, severerisk, icon))
+str(Rainfall)
+```
+
+## Check missing value
+
+```{r}
+sum(is.na(Rainfall))
+colSums(is.na(Rainfall))
+```
+
+## Check outliers
+
+```{r}
+boxplot(Rainfall$tempmax)
+boxplot(Rainfall$tempmin)
+boxplot(Rainfall$temp)
+boxplot(Rainfall$feelslikemax)
+boxplot(Rainfall$feelslikemin)
+boxplot(Rainfall$feelslike)
+boxplot(Rainfall$dew)
+boxplot(Rainfall$humidity)
+boxplot(Rainfall$precip)
+boxplot(Rainfall$precipcover)
+boxplot(Rainfall$cloudcover)
+boxplot(Rainfall$visibility)
+boxplot(Rainfall$solarradiation)
+boxplot(Rainfall$solarenergy)
+```
+
+**Check duplication**
+
+```{r}
+sum(duplicated(Rainfall))
+```
+
+**skewness**
+
+```{r}
+hist(Rainfall$tempmax)
+hist(Rainfall$tempmin)
+hist(Rainfall$temp)
+hist(Rainfall$feelslikemax)
+hist(Rainfall$feelslikemin)
+hist(Rainfall$feelslike)
+hist(Rainfall$dew)
+hist(Rainfall$humidity)
+hist(Rainfall$precip)
+hist(Rainfall$precipcover)
+hist(Rainfall$cloudcover)
+hist(Rainfall$visibility)
+hist(Rainfall$solarradiation)
+hist(Rainfall$solarenergy)
+```
+
+**skewness test**
+
+```{r}
+install.packages("moments")
+library(moments)
+skewness(Rainfall$tempmax,na.rm=TRUE)
+skewness(Rainfall$tempmin,na.rm=TRUE)
+skewness(Rainfall$temp,na.rm=TRUE)
+skewness(Rainfall$feelslikemax,na.rm=TRUE)
+skewness(Rainfall$feelslikemin,na.rm=TRUE)
+skewness(Rainfall$feelslike,na.rm=TRUE)
+skewness(Rainfall$dew,na.rm=TRUE)
+skewness(Rainfall$humidity,na.rm=TRUE)
+skewness(Rainfall$precip,na.rm=TRUE)
+skewness(Rainfall$precipcover,na.rm=TRUE)
+skewness(Rainfall$cloudcover,na.rm=TRUE)
+skewness(Rainfall$visibility,na.rm=TRUE)
+skewness(Rainfall$solarradiation,na.rm=TRUE)
+skewness(Rainfall$solarenergy,na.rm=TRUE)
+```
+
+**Categorical variable**
+
+```{r}
+library(ggplot2)
+ggplot(Rainfall,aes(x=uvindex))+ geom_bar()
+ggplot(Rainfall,aes(x=description))+ geom_bar()
+```
+
+**correlation**
+
+```{R}
+Rainfall_sub <- subset(Rainfall, select = -c(description, uvindex))
+cr_Rainfall <- cor(Rainfall_sub)
+cr_Rainfall
+corrplot(cr_Rainfall,method="color")
+```
+
+## Bivariate Analysis
+
+```{r}
+library(tidycomm)
+correlate(Rainfall)
+```
+
+```{r}
+correlate(Rainfall)%>% 
+  to_correlation_matrix()
+```
+
+```{r}
+plot(Rainfall$tempmax, Rainfall$precip, main="Scatter Plot with Max Temperature", xlab="Max Temperature", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$tempmax), col="red")
+```
+
+```{r}
+plot(Rainfall$tempmin, Rainfall$precip, main="Scatter Plot with Min Temperature", xlab="Min Temperature", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$tempmin), col="red")
+```
+
+```{r}
+plot(Rainfall$temp, Rainfall$precip, main="Scatter Plot with Temperature", xlab="Temperature", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$temp), col="red")
+```
+
+```{r}
+plot(Rainfall$feelslikemax, Rainfall$precip, main="Scatter Plot with Max Temperature Feel", xlab="Max Temperature Feel", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$feelslikemax), col="red")
+```
+
+```{r}
+plot(Rainfall$feelslikemin, Rainfall$precip, main="Scatter Plot with Min Temperature Feel", xlab="Min Temperature Feel", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$feelslikemin), col="red")
+```
+
+```{r}
+plot(Rainfall$feelslike, Rainfall$precip, main="Scatter Plot with Temperature Feel", xlab="Temperature Feel", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$feelslike), col="red")
+```
+
+```{r}
+plot(Rainfall$dew, Rainfall$precip, main="Scatter Plot with Dew", xlab="Dew", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$dew), col="red")
+```
+
+```{r}
+plot(Rainfall$humidity, Rainfall$precip, main="Scatter Plot with Humidity", xlab="Humidity", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$humidity), col="red")
+```
+
+```{r}
+plot(Rainfall$precipcover, Rainfall$precip, main="Scatter Plot with Precipitation Cover", xlab="Precipitation Cover", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$precipcover), col="red")
+```
+
+```{r}
+plot(Rainfall$cloudcover, Rainfall$precip, main="Scatter Plot with Cloud Cover", xlab="Cloud Cover", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$cloudcover), col="red")
+```
+
+```{r}
+plot(Rainfall$visibility, Rainfall$precip, main="Scatter Plot with Visibility", xlab="Visibility", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$visibility), col="red")
+```
+
+```{r}
+plot(Rainfall$solarradiation, Rainfall$precip, main="Scatter Plot with Solar Radiation", xlab="Solar Radiation", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$solarradiation), col="red")
+```
+
+```{r}
+plot(Rainfall$solarenergy, Rainfall$precip, main="Scatter Plot with Solar Energy", xlab="Solar Energy", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$solarenergy), col="red")
+```
+
+```{r}
+corr<-aov(precip ~ description * uvindex, data=Rainfall)
+summary(corr)
+```
+
+## **Multivariate Analysis**
+
+**Multiple Linear Regression**
+
+```{r}
+Precipitation <- lm(precip ~ description + uvindex + tempmax + tempmin + temp + feelslikemax + feelslikemin + feelslike + dew + humidity + precipcover + cloudcover + visibility + solarradiation + solarenergy, data = Rainfall)
+anova(Precipitation)
+```
+
+```{r}
+summary(Precipitation)
+```
+
+```{r}
+# Get the model residuals
+model_residuals = Precipitation$residuals
+
+# Plot the result
+hist(model_residuals)
+```
+
+```{r}
+# Plot the residuals
+qqnorm(model_residuals)
+# Plot the Q-Q line
+qqline(model_residuals)
+```
+
+```{r}
+#Install and Load necessary libraries 
+install.packages("caret") 
+install.packages("nnet") 
+install.packages("randomForest") 
+install.packages("Metrics") 
+install.packages("ggplot2")
+
+library(caret) 
+library(nnet) 
+library(randomForest) 
+library(Metrics) 
+library(ggplot2)
+```
+
+```{r}
+#Load dataset and standardize time format for easy sorting
+data<- read.csv("Rainfall1.csv") 
+data$datetime <- as.Date(data$datetime, format="%m/%d/%Y") 
+head(data) 
+data <- data[order(data$datetime), ] 
+data
+```
+
+# Split the dataset into features and target variable
+
+```{r}
+features <- data[, c("tempmax", "tempmin", "temp", "dew", "humidity", "precipcover", "windspeed", "winddir", "cloudcover", "visibility")] 
+target <- data$precip
+```
+
+# Calculate the index for an 80-20 split
+
+```{r}
+set.seed(123) split_index <- floor(0.8 * nrow(data)) split_index
+```
+
+# Split the data into training and testing sets based on the index
+
+```{r}
+train_features <- features[1:split_index, ] 
+train_target <- target[1:split_index] 
+test_features <- features[(split_index + 1):nrow(data), ] 
+test_target <- target[(split_index + 1):nrow(data)]
+```
+
+# Standardize the features
+
+```{r}
+preproc <- preProcess(train_features, method = c("center", "scale")) train_features_scaled <- predict(preproc, train_features) 
+test_features_scaled <- predict(preproc, test_features)
+```
+
+# Combine scaled features with target for training
+
+```{r}
+train_data <- data.frame(train_target, train_features_scaled) 
+names(train_data)[1] <- "precip"
+```
+
+# Train the ANN model
+
+```{r}
+ann_model <- nnet(precip ~ ., data = train_data, size = 10, linout = TRUE, maxit = 150)
+```
+
+# Predict on test set
+
+```{r}
+ann_predictions <- predict(ann_model, test_features_scaled) 
+# Ensure that all predictions are at least 0 
+ann_predictions <- ifelse(ann_predictions < 0, 0, ann_predictions)
+```
+
+# Calculate accuracy metrics
+
+```{r}
+ann_mae <- mae(test_target, ann_predictions) 
+ann_mse <- mse(test_target, ann_predictions) 
+ann_rmse <- sqrt(ann_mse) 
+ann_r2<-R2(test_target, ann_predictions) 
+print(paste("ANN Model MAE:", ann_mae)) 
+print(paste("ANN Model MSE:", ann_mse)) 
+print(paste("ANN Model RMSE:", ann_rmse)) 
+print(paste("ANN Model R2:", ann_r2))
+```
+
+# Plot the actual vs predicted values for the test set
+
+```{r}
+test_datetime <- data$datetime[801:1000] ggplot() + geom_line(aes(x = test_datetime, y = test_target), color = "blue") + geom_line(aes(x = test_datetime, y = ann_predictions), color = "red") + ggtitle("ANN Model - Actual vs Predicted Precipitation") + xlab("Date") + ylab("Precipitation") 
+
+#END OF ANN
+```
+
+```{r}
+#RF 
+data1 <- read.csv("Rainfall1.csv") data1$datetime <- as.Date(data1$datetime, format="%m/%d/%Y") data1 <- data1[order(data1$datetime), ]
+```
+
+# Split the dataset into features and target variable
+
+```{r}
+features1 <- data1[, c("tempmax", "tempmin", "temp", "dew", "humidity", "precipcover", "windspeed", "winddir", "cloudcover", "visibility")] 
+target1 <- data1$precip 
+train_features1 <- features1[1:split_index, ] 
+train_target1 <- target1[1:split_index] 
+test_features1 <- features1[(split_index + 1):nrow(data1), ] 
+test_target1 <- target1[(split_index + 1):nrow(data1)]
+```
+
+# Train the RF model
+
+```{r}
+train_data1 <- data.frame(train_target1, train_features1) 
+names(train_data1)[1] <- "precip" 
+rf_model <- randomForest(precip ~ ., data = train_data1, ntree = 500)
+```
+
+# Predict on test set
+
+```{r}
+rf_predictions <- predict(rf_model, test_features1)
+```
+
+# Ensure that all predictions are at least 0
+
+```{r}
+rf_predictions <- ifelse(rf_predictions < 0, 0, rf_predictions)
+```
+
+# Calculate accuracy metrics
+
+```{r}
+rf_mae <- mae(test_target1, rf_predictions) 
+rf_mse <- mse(test_target1, rf_predictions) 
+rf_rmse <- sqrt(rf_mse) 
+rf_r2<-R2(test_target1, rf_predictions) 
+print(paste("RF Model MAE:", rf_mae)) 
+print(paste("RF Model MSE:", rf_mse)) 
+print(paste("RF Model RMSE:", rf_rmse)) 
+print(paste("RF Model R2:", rf_r2)) 
+# Plot the actual vs predicted values for the test set 
+test_datetime_rf <- data1$datetime[(split_index + 1):nrow(data1)] ggplot() + geom_line(aes(x = test_datetime_rf, y = test_target), color = "blue") + geom_line(aes(x = test_datetime_rf, y = rf_predictions), color = "green") + ggtitle("RF Model - Actual vs Predicted Precipitation") + xlab("Date") + ylab("Precipitation")
+
+#Multilinear Regression
+data2 <- read.csv("Rainfall1.csv") 
+data2$datetime <- as.Date(data1$datetime, format="%m/%d/%Y") 
+data2 <- data2[order(data1$datetime), ]
+```
+
+# Split the dataset into features and target variable
+
+```{r}
+features2 <- data2[, c("tempmax", "tempmin", "temp", "dew", "humidity", "precipcover", "windspeed", "winddir", "cloudcover", "visibility")] 
+target2 <- data2$precip 
+train_features2 <- features2[1:split_index, ] 
+train_target2 <- target2[1:split_index] 
+test_features2 <- features2[(split_index + 1):nrow(data1), ] 
+test_target2 <- target2[(split_index + 1):nrow(data1)] 
+# Train the LM model 
+train_data2 <- data.frame(train_target2, train_features2) 
+names(train_data2)[1] <- "precip" 
+lm_model <- lm(precip ~ ., data = train_data2)
+```
+
+# Predict on test set
+
+```{r}
+lm_predictions <- predict(lm_model, newdata = test_features2)
+```
+
+# Ensure that all predictions are at least 0
+
+```{r}
+lm_predictions <- ifelse(lm_predictions < 0, 0, lm_predictions)
+```
+
+# Calculate accuracy metrics
+
+```{r}
+lm_mae <- mae(test_target2, lm_predictions) 
+lm_mse <- mse(test_target2, lm_predictions) 
+lm_rmse <- sqrt(lm_mse) 
+lm_r2<-R2(test_target2, lm_predictions) 
+print(paste("Linear Regression Model MAE:", lm_mae)) 
+print(paste("Linear Regression Model MSE:", lm_mse)) 
+print(paste("Linear Regression Model RMSE:", lm_rmse)) 
+print(paste("Linear Regression Model R2:", lm_r2))
+```
+
+# Plot the actual vs predicted values for the test set
+
+```{r}
+ggplot() + geom_line(aes(x = test_datetime, y = test_target2), color = "blue") + geom_line(aes(x = test_datetime, y = lm_predictions), color = "red") + ggtitle("Linear Regression Model - Actual vs Predicted Precipitation") + xlab("Date") + ylab("Precipitation")
+```
+
+```{r}
+#SVM 
+library(e1071)
+
+#insert data and order
+data4 <- read.csv("Rainfall1.csv") 
+data4$datetime <- as.Date(data4$datetime, format="%m/%d/%Y") 
+data4 <- data4[order(data4$datetime), ]
+```
+
+# Split the dataset into features and target variable
+
+```{r}
+features4 <- data4[, c("tempmax", "tempmin", "temp", "dew", "humidity", "precipcover", "windspeed", "winddir", "cloudcover", "visibility")] 
+target4 <- data4$precip 
+train_features4 <- features4[1:split_index, ] 
+train_target4 <- target4[1:split_index] 
+test_features4 <- features4[(split_index + 1):nrow(data4), ] 
+test_target4 <- target4[(split_index + 1):nrow(data4)]
+
+#SVM modelling 
+train_data4 <- data.frame(train_target4, train_features4) 
+names(train_data4)[1] <- "precip" 
+svm_model <- svm(precip ~ ., data = train_data4, kernel = "linear", cost = 10) svm_predictions <- predict(svm_model, newdata=test_features4)
+```
+
+# Ensure that all predictions are at least 0
+
+```{r}
+svm_predictions <- ifelse(svm_predictions < 0, 0, svm_predictions)
+```
+
+# Calculate accuracy metrics
+
+```{r}
+svm_mae <- mae(test_target4, svm_predictions) 
+svm_mse <- mse(test_target4, svm_predictions) 
+svm_rmse <- sqrt(svm_mse) 
+svm_r2<-R2(test_target4, svm_predictions) 
+print(paste("svm Model MAE:", svm_mae)) 
+print(paste("svm Model MSE:", svm_mse)) 
+print(paste("svm Model RMSE:", svm_rmse)) 
+print(paste("svm Model R2:", svm_r2))
+
+#plot 
+test_datetime_svm <- data4$datetime[(split_index + 1):nrow(data4)] ggplot() + geom_line(aes(x = test_datetime_svm, y = test_target4), color = "blue") + geom_line(aes(x = test_datetime_svm, y = svm_predictions), color = "green") + ggtitle("Support Vector Machine - Actual vs Predicted Precipitation") + xlab("Date") + ylab("Precipitation")
+
+#Evaluation Table
+Model_evaluation <- data.frame( model_name=c("Artificial Neutral Network Model","Random Forest","Multiple Linear Regression","Support Vector Machine"), mae_value=c("10.345","7.839","9.722","4.547"), rmse_value=c("18.669","11.823","12.938","9.204"), R2_score=c("0.114","0.157","0.169","0.157") ) 
+print(Model_evaluation)
+```
+
+# Combine predictions into a DataFrame
+
+```{r}
+combined_predictions <- data.frame( ANN_Predictions = ann_predictions, RF_Predictions = rf_predictions, LM_Predictions = lm_predictions, SVM_Predictions = svm_predictions )
+```
+
+# Write the DataFrame to a CSV file
+
+```{r}
+write.csv(combined_predictions, "combined_predictions.csv", row.names = FALSE)
+saveRDS(svm_model, "svm_model.rds")
+```
