@@ -1,0 +1,264 @@
+---
+title: "Rainfall"
+author: "CHEN XIN WEI 17202767"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+## Get data
+
+```{r setup, include=FALSE}
+getwd()
+Rainfall <- read.csv("Rainfall.csv")
+```
+
+#Data Exploration
+
+```{r}
+names(Rainfall)
+class(Rainfall)
+str(Rainfall)
+dim(Rainfall)
+summary(Rainfall)
+head(Rainfall)
+tail(Rainfall)
+```
+
+#First Variable Drop
+
+```{r}
+Rainfall <- subset(Rainfall, select = -c(name,datetime,precipprob,preciptype,snow,snowdepth,sunrise,sunset,conditions,stations))
+str(Rainfall)
+```
+
+#Transform categorical variable
+
+```{r}
+Rainfall$description<-as.factor(Rainfall$description)
+Rainfall$icon<-as.factor(Rainfall$icon)
+Rainfall$uvindex<-as.factor(Rainfall$uvindex)
+```
+
+##Checking relationship between cat var with dependent var
+
+```{r}
+corr<-aov(precip ~ description * uvindex * icon, data=Rainfall)
+summary(corr)
+```
+
+#correlation matric
+
+```{r}
+Rainfall_sub <- subset(Rainfall, select = -c(description,icon,uvindex))
+library(corrplot)
+cr_Rainfall <- cor(Rainfall_sub)
+cr_Rainfall
+corrplot(cr_Rainfall,method="color")
+```
+
+## Second Variable Drop
+
+```{r}
+Rainfall <- subset(Rainfall, select = -c(windgust, windspeed, winddir, sealevelpressure, moonphase, severerisk, icon))
+```
+
+## Check missing value
+
+```{r}
+sum(is.na(Rainfall))
+colSums(is.na(Rainfall))
+```
+
+## Check outliers
+
+```{r}
+boxplot(Rainfall$tempmax)
+boxplot(Rainfall$tempmin)
+boxplot(Rainfall$temp)
+boxplot(Rainfall$feelslikemax)
+boxplot(Rainfall$feelslikemin)
+boxplot(Rainfall$feelslike)
+boxplot(Rainfall$dew)
+boxplot(Rainfall$humidity)
+boxplot(Rainfall$precip)
+boxplot(Rainfall$precipcover)
+boxplot(Rainfall$cloudcover)
+boxplot(Rainfall$visibility)
+boxplot(Rainfall$solarradiation)
+boxplot(Rainfall$solarenergy)
+```
+
+##Check duplication
+
+```{r}
+sum(duplicated(Rainfall))
+```
+
+#skewness
+
+```{r}
+hist(Rainfall$tempmax)
+hist(Rainfall$tempmin)
+hist(Rainfall$temp)
+hist(Rainfall$feelslikemax)
+hist(Rainfall$feelslikemin)
+hist(Rainfall$feelslike)
+hist(Rainfall$dew)
+hist(Rainfall$humidity)
+hist(Rainfall$precip)
+hist(Rainfall$precipcover)
+hist(Rainfall$cloudcover)
+hist(Rainfall$visibility)
+hist(Rainfall$solarradiation)
+hist(Rainfall$solarenergy)
+```
+
+#skewness test
+
+```{r}
+install.packages("moments")
+library(moments)
+skewness(Rainfall$tempmax,na.rm=TRUE)
+skewness(Rainfall$tempmin,na.rm=TRUE)
+skewness(Rainfall$temp,na.rm=TRUE)
+skewness(Rainfall$feelslikemax,na.rm=TRUE)
+skewness(Rainfall$feelslikemin,na.rm=TRUE)
+skewness(Rainfall$feelslike,na.rm=TRUE)
+skewness(Rainfall$dew,na.rm=TRUE)
+skewness(Rainfall$humidity,na.rm=TRUE)
+skewness(Rainfall$precip,na.rm=TRUE)
+skewness(Rainfall$precipcover,na.rm=TRUE)
+skewness(Rainfall$cloudcover,na.rm=TRUE)
+skewness(Rainfall$visibility,na.rm=TRUE)
+skewness(Rainfall$solarradiation,na.rm=TRUE)
+skewness(Rainfall$solarenergy,na.rm=TRUE)
+```
+
+#Categorical variable
+
+```{r}
+library(ggplot2)
+ggplot(Rainfall,aes(x=uvindex))+ geom_bar()
+ggplot(Rainfall,aes(x=description))+ geom_bar()
+```
+
+#correlation
+
+```{R}
+Rainfall_sub <- subset(Rainfall, select = -c(description, uvindex))
+cr_Rainfall <- cor(Rainfall_sub)
+cr_Rainfall
+corrplot(cr_Rainfall,method="color")
+```
+
+## Bivariate Analysis
+
+```{r}
+library(tidycomm)
+correlate(Rainfall)
+```
+
+```{r}
+correlate(Rainfall)%>% 
+  to_correlation_matrix()
+```
+
+```{r}
+plot(Rainfall$tempmax, Rainfall$precip, main="Scatter Plot with Max Temperature", xlab="Max Temperature", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$tempmax), col="red")
+```
+
+```{r}
+plot(Rainfall$tempmin, Rainfall$precip, main="Scatter Plot with Min Temperature", xlab="Min Temperature", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$tempmin), col="red")
+```
+
+```{r}
+plot(Rainfall$temp, Rainfall$precip, main="Scatter Plot with Temperature", xlab="Temperature", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$temp), col="red")
+```
+
+```{r}
+plot(Rainfall$feelslikemax, Rainfall$precip, main="Scatter Plot with Max Temperature Feel", xlab="Max Temperature Feel", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$feelslikemax), col="red")
+```
+
+```{r}
+plot(Rainfall$feelslikemin, Rainfall$precip, main="Scatter Plot with Min Temperature Feel", xlab="Min Temperature Feel", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$feelslikemin), col="red")
+```
+
+```{r}
+plot(Rainfall$feelslike, Rainfall$precip, main="Scatter Plot with Temperature Feel", xlab="Temperature Feel", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$feelslike), col="red")
+```
+
+```{r}
+plot(Rainfall$dew, Rainfall$precip, main="Scatter Plot with Dew", xlab="Dew", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$dew), col="red")
+```
+
+```{r}
+plot(Rainfall$humidity, Rainfall$precip, main="Scatter Plot with Humidity", xlab="Humidity", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$humidity), col="red")
+```
+
+```{r}
+plot(Rainfall$precipcover, Rainfall$precip, main="Scatter Plot with Precipitation Cover", xlab="Precipitation Cover", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$precipcover), col="red")
+```
+
+```{r}
+plot(Rainfall$cloudcover, Rainfall$precip, main="Scatter Plot with Cloud Cover", xlab="Cloud Cover", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$cloudcover), col="red")
+```
+
+```{r}
+plot(Rainfall$visibility, Rainfall$precip, main="Scatter Plot with Visibility", xlab="Visibility", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$visibility), col="red")
+```
+
+```{r}
+plot(Rainfall$solarradiation, Rainfall$precip, main="Scatter Plot with Solar Radiation", xlab="Solar Radiation", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$solarradiation), col="red")
+```
+
+```{r}
+plot(Rainfall$solarenergy, Rainfall$precip, main="Scatter Plot with Solar Energy", xlab="Solar Energy", ylab="Precipitation", col="blue", pch=16)
+abline(lm(Rainfall$precip ~ Rainfall$solarenergy), col="red")
+```
+
+```{r}
+corr<-aov(precip ~ description * uvindex, data=Rainfall)
+summary(corr)
+```
+
+## **Multivariate Analysis**
+
+##Multiple Linear Regression
+
+```{r}
+Precipitation <- lm(precip ~ description + uvindex + tempmax + tempmin + temp + feelslikemax + feelslikemin + feelslike + dew + humidity + precipcover + cloudcover + visibility + solarradiation + solarenergy, data = Rainfall)
+anova(Precipitation)
+```
+
+```{r}
+summary(Precipitation)
+```
+
+```{r}
+# Get the model residuals
+model_residuals = Precipitation$residuals
+
+# Plot the result
+hist(model_residuals)
+```
+
+
+
+```{r}
+# Plot the residuals
+qqnorm(model_residuals)
+# Plot the Q-Q line
+qqline(model_residuals)
+```
